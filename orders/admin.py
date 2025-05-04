@@ -1,7 +1,4 @@
 from django.contrib import admin
-
-# Register your models here.
-from django.contrib import admin
 from django.utils.html import format_html
 from .models import Cart, CartItem, Order, OrderItem, DeliverySlip, ClientOrderHistory, EmployeeDeliveryHistory
 
@@ -36,17 +33,22 @@ class OrderItemInline(admin.TabularInline):
 @admin.register(Order)
 class OrderAdmin(admin.ModelAdmin):
     inlines = [OrderItemInline]
-    list_display = ('id', 'client', 'created_at', 'delivery_type', 'delivery_address', 'total_amount', 'status')
+    list_display = ('id', 'client', 'created_at', 'delivery_type', 'delivery_address', 'total_amount', 'status', 'delivery_slip_status')
     search_fields = ('client__username', 'delivery_address')
     list_filter = ('delivery_type', 'status', 'created_at')
     readonly_fields = ('created_at', 'total_amount')
+    fields = ('client', 'delivery_type', 'delivery_address', 'total_amount', 'status', 'created_at')
+
+    def delivery_slip_status(self, obj):
+        return obj.delivery_slip.status if hasattr(obj, 'delivery_slip') else "-"
+    delivery_slip_status.short_description = "Statut du bon de livraison"
 
 @admin.register(DeliverySlip)
 class DeliverySlipAdmin(admin.ModelAdmin):
     list_display = ('order', 'employee', 'created_at', 'status', 'products_list')
     search_fields = ('order__id', 'employee__username')
     list_filter = ('status', 'created_at')
-    fields = ('order', 'employee', 'status')
+    fields = ('order', 'employee', 'status', 'created_at')
     readonly_fields = ('order', 'created_at')
 
     def products_list(self, obj):

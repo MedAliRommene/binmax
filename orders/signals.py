@@ -16,3 +16,17 @@ def create_delivery_slip_and_history(sender, instance, created, **kwargs):
             delivery_slip.employee = employee
             delivery_slip.save()
             EmployeeDeliveryHistory.objects.create(employee=employee, delivery_slip=delivery_slip)
+
+@receiver(post_save, sender=DeliverySlip)
+def update_order_status(sender, instance, created, **kwargs):
+    # Synchroniser le statut de la commande avec celui du bon de livraison
+    order = instance.order
+    if instance.status == 'PENDING':
+        order.status = 'PENDING'
+    elif instance.status == 'PREPARED':
+        order.status = 'PREPARING'
+    elif instance.status == 'SHIPPED':
+        order.status = 'SHIPPED'
+    elif instance.status == 'DELIVERED':
+        order.status = 'DELIVERED'
+    order.save()

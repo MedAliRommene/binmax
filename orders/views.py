@@ -1,10 +1,8 @@
 from django.shortcuts import render
-
-# Create your views here.
 from rest_framework import viewsets, status
 from rest_framework.decorators import action
 from rest_framework.response import Response
-from rest_framework.permissions import IsAuthenticated, IsAdminUser
+from rest_framework.permissions import IsAuthenticated
 from .models import Cart, CartItem, Order, OrderItem, DeliverySlip, ClientOrderHistory, EmployeeDeliveryHistory
 from .serializers import (
     CartSerializer, CartItemSerializer, OrderSerializer, OrderItemSerializer,
@@ -67,6 +65,19 @@ class OrderViewSet(viewsets.ModelViewSet):
         if self.request.user.role == 'CLIENT':
             return self.queryset.filter(client=self.request.user)
         return self.queryset
+
+    @action(detail=True, methods=['post'])
+    def update_status(self, request, pk=None):
+        order = self.get_object()
+        new_status = request.data.get('status')
+        valid_statuses = [choice[0] for choice in Order.STATUS_CHOICES]
+        if new_status not in valid_statuses:
+            return Response({"error": "Statut invalide"}, status=status.HTTP_400_BAD_REQUEST)
+        if request.user.role not in ['EMPLOYE', 'ADMIN']:
+            return Response({"error": "Permission refusée"}, status=status.HTTP_403_FORBIDDEN)
+        order.status = new_status
+        order.save()
+        return Response(OrderSerializer(order).data, status=status.HTTP_200_OK)
 
 class DeliverySlipViewSet(viewsets.ModelViewSet):
     queryset = DeliverySlip.objects.all()

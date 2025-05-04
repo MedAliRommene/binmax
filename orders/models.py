@@ -1,7 +1,4 @@
 from django.db import models
-
-# Create your models here.
-from django.db import models
 from django.core.validators import MinValueValidator
 from django.utils import timezone
 from users.models import CustomUser, ClientProfile
@@ -45,17 +42,18 @@ class Order(models.Model):
         ('DOMICILE', 'Livraison à domicile'),
         ('MAGASIN', 'Retrait en magasin'),
     ]
+    STATUS_CHOICES = [
+        ('PENDING', 'En attente'),
+        ('PREPARING', 'En préparation'),
+        ('SHIPPED', 'Expédié'),
+        ('DELIVERED', 'Livré'),
+    ]
     client = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name='orders', limit_choices_to={'role': 'CLIENT'}, verbose_name="Client")
     created_at = models.DateTimeField(auto_now_add=True, verbose_name="Date de création")
     delivery_type = models.CharField(max_length=10, choices=DELIVERY_TYPES, verbose_name="Type de livraison")
     delivery_address = models.TextField(verbose_name="Adresse de livraison")
     total_amount = models.DecimalField(max_digits=10, decimal_places=2, default=0.00, verbose_name="Montant total")
-    status = models.CharField(max_length=20, default='PENDING', choices=[
-        ('PENDING', 'En attente'),
-        ('PREPARING', 'En préparation'),
-        ('SHIPPED', 'Expédié'),
-        ('DELIVERED', 'Livré'),
-    ], verbose_name="Statut")
+    status = models.CharField(max_length=20, default='PENDING', choices=STATUS_CHOICES, verbose_name="Statut")
 
     class Meta:
         verbose_name = "Commande"
@@ -85,14 +83,16 @@ class OrderItem(models.Model):
         return f"{self.quantity} x {self.product.name} dans commande {self.order.id}"
 
 class DeliverySlip(models.Model):
-    order = models.OneToOneField(Order, on_delete=models.CASCADE, related_name='delivery_slip', verbose_name="Commande")
-    employee = models.ForeignKey(CustomUser, on_delete=models.SET_NULL, null=True, related_name='delivery_slips', limit_choices_to={'role': 'EMPLOYE'}, verbose_name="Employé")
-    created_at = models.DateTimeField(auto_now_add=True, verbose_name="Date de création")
-    status = models.CharField(max_length=20, default='PENDING', choices=[
+    STATUS_CHOICES = [
         ('PENDING', 'En attente'),
         ('PREPARED', 'Préparé'),
         ('SHIPPED', 'Expédié'),
-    ], verbose_name="Statut")
+        ('DELIVERED', 'Livré'),  # Ajouté pour correspondre à Order.status
+    ]
+    order = models.OneToOneField(Order, on_delete=models.CASCADE, related_name='delivery_slip', verbose_name="Commande")
+    employee = models.ForeignKey(CustomUser, on_delete=models.SET_NULL, null=True, related_name='delivery_slips', limit_choices_to={'role': 'EMPLOYE'}, verbose_name="Employé")
+    created_at = models.DateTimeField(auto_now_add=True, verbose_name="Date de création")
+    status = models.CharField(max_length=20, default='PENDING', choices=STATUS_CHOICES, verbose_name="Statut")
 
     class Meta:
         verbose_name = "Bon de livraison"
