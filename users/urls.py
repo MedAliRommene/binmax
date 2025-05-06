@@ -7,5 +7,5 @@ router.register(r'users', CustomUserViewSet)
 router.register(r'client-profiles', ClientProfileViewSet)
 
 urlpatterns = [
-    path('', include(router.urls)),
+path('', include(router.urls)),
 ]

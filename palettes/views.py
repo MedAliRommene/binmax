@@ -3,7 +3,7 @@ from .models import Palette
 from .serializers import PaletteSerializer
 
 class PaletteViewSet(viewsets.ModelViewSet):
-    queryset = Palette.objects.prefetch_related('products').all()
+    queryset = Palette.objects.prefetch_related('products').select_related('fournisseur').all()
     serializer_class = PaletteSerializer
 
     def perform_create(self, serializer):
