@@ -9,6 +9,8 @@ from rest_framework_simplejwt.views import (
 
 urlpatterns = [
     path('admin/', admin.site.urls),
+    path('', include('dashbords.urls')),
+    path("", include('admin_soft.urls')),
     path('api/products/', include('products.urls')),
     path('api/palettes/', include('palettes.urls')),
     path('api/users/', include('users.urls')),
