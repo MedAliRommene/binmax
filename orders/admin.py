@@ -41,7 +41,7 @@ class OrderAdmin(admin.ModelAdmin):
 
     def delivery_slip_status(self, obj):
         return obj.delivery_slip.status if hasattr(obj, 'delivery_slip') else "-"
-    delivery_slip_status.short_description = "Statut du bon de livraison"
+    delivery_slip_status.short_description = "Statut du bon de commande"
 
 @admin.register(DeliverySlip)
 class DeliverySlipAdmin(admin.ModelAdmin):

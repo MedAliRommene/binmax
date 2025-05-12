@@ -95,12 +95,12 @@ class DeliverySlip(models.Model):
     status = models.CharField(max_length=20, default='PENDING', choices=STATUS_CHOICES, verbose_name="Statut")
 
     class Meta:
-        verbose_name = "Bon de livraison"
-        verbose_name_plural = "Bons de livraison"
+        verbose_name = "Bon de commande"
+        verbose_name_plural = "Bons de commande"
         ordering = ['-created_at']
 
     def __str__(self):
-        return f"Bon de livraison pour commande {self.order.id}"
+        return f"Bon de commande pour  {self.order.id}"
 
 class ClientOrderHistory(models.Model):
     client = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name='order_history', limit_choices_to={'role': 'CLIENT'}, verbose_name="Client")
@@ -117,7 +117,7 @@ class ClientOrderHistory(models.Model):
 
 class EmployeeDeliveryHistory(models.Model):
     employee = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name='delivery_history', limit_choices_to={'role': 'EMPLOYE'}, verbose_name="Employé")
-    delivery_slip = models.ForeignKey(DeliverySlip, on_delete=models.CASCADE, verbose_name="Bon de livraison")
+    delivery_slip = models.ForeignKey(DeliverySlip, on_delete=models.CASCADE, verbose_name="Bon de commande")
     created_at = models.DateTimeField(auto_now_add=True, verbose_name="Date")
 
     class Meta:
