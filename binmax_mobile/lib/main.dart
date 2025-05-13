@@ -28,11 +28,11 @@ class BinmaxApp extends StatelessWidget {
         textTheme: GoogleFonts.poppinsTextTheme(),
       ),
       routes: {
-        '/': (context) => const EcranConnexion(),
+        '/connexion': (context) => const EcranConnexion(),
         '/inscription': (context) => const EcranInscription(),
-        '/accueil': (context) => const EcranPrincipal(),
-        '/swipe': (context) => const EcranSwipe(),
+        '/principal': (context) => const EcranPrincipal(),
         '/panier': (context) => const EcranPanier(),
+        '/swipe': (context) => const EcranSwipe(),
       },
     );
   }

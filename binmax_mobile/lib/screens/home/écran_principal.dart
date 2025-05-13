@@ -10,7 +10,6 @@ class EcranPrincipal extends StatefulWidget {
 }
 
 class _EcranPrincipalState extends State<EcranPrincipal> {
-  int _indexCategorie = 0;
   final List<String> _categories = ['Électronique', 'Mode', 'Maison', 'Beauté'];
   int _currentIndex = 0;
 
@@ -30,6 +29,10 @@ class _EcranPrincipalState extends State<EcranPrincipal> {
     }
   }
 
+  void _handleCategorySelection(String category) {
+    Navigator.pushNamed(context, '/swipe', arguments: category);
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -40,42 +43,76 @@ class _EcranPrincipalState extends State<EcranPrincipal> {
         title: Text(
           'BinMax',
           style: GoogleFonts.inter(
-            fontWeight: FontWeight.w700,
+            fontWeight: FontWeight.w800,
             fontSize: 24,
-            color: const Color(0xFF1E88E5),
+            color: const Color(0xFFE94057),
           ),
         ),
         actions: [
           IconButton(
-            icon: const Icon(Icons.search_rounded, color: Color(0xFF1E88E5)),
+            icon: const Icon(Icons.search_rounded, color: Color(0xFFE94057)),
             onPressed: _handleSearch,
           ).animate().fadeIn(delay: 800.ms),
         ],
       ),
       drawer: _menuNavigation(context),
       body: SafeArea(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
-              child: Text(
-                'Découvrez nos offres',
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'Choisissez une catégorie',
                 style: GoogleFonts.inter(
                   fontSize: 24,
                   fontWeight: FontWeight.w700,
                   color: const Color(0xFF333333),
                 ),
               ).animate().fadeIn(delay: 200.ms),
-            ),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16),
-              child: _selecteurCategories(),
-            ).animate().fadeIn(delay: 400.ms),
-            Expanded(
-              child: _productGrid(),
-            ),
-          ],
+              const SizedBox(height: 24),
+              Expanded(
+                child: GridView.builder(
+                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount: 2,
+                    crossAxisSpacing: 16,
+                    mainAxisSpacing: 16,
+                    childAspectRatio: 1.0,
+                  ),
+                  itemCount: _categories.length,
+                  itemBuilder: (context, index) {
+                    return GestureDetector(
+                      onTap: () => _handleCategorySelection(_categories[index]),
+                      child: Container(
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(12),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withOpacity(0.1),
+                              blurRadius: 8,
+                              offset: const Offset(0, 4),
+                            ),
+                          ],
+                        ),
+                        child: Center(
+                          child: Text(
+                            _categories[index],
+                            style: GoogleFonts.inter(
+                              fontSize: 18,
+                              fontWeight: FontWeight.w600,
+                              color: const Color(0xFFE94057),
+                            ),
+                            textAlign: TextAlign.center,
+                          ),
+                        ),
+                      ),
+                    ).animate().fadeIn(delay: Duration(milliseconds: 200 + index * 100));
+                  },
+                ),
+              ),
+            ],
+          ),
         ),
       ),
       bottomNavigationBar: BottomNavigationBar(
@@ -83,22 +120,16 @@ class _EcranPrincipalState extends State<EcranPrincipal> {
         onTap: (index) {
           setState(() => _currentIndex = index);
           if (index == 1) {
-            Navigator.pushNamed(context, '/swipe');
-          } else if (index == 2) {
             Navigator.pushNamed(context, '/panier');
           }
         },
-        selectedItemColor: const Color(0xFF1E88E5),
+        selectedItemColor: const Color(0xFFE94057),
         unselectedItemColor: const Color(0xFF666666),
         backgroundColor: Colors.white,
         items: const [
           BottomNavigationBarItem(
             icon: Icon(Icons.home_rounded),
             label: 'Accueil',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.swipe_rounded),
-            label: 'Swipe',
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.shopping_cart_rounded),
@@ -117,7 +148,7 @@ class _EcranPrincipalState extends State<EcranPrincipal> {
         children: [
           DrawerHeader(
             decoration: const BoxDecoration(
-              color: Color(0xFF1E88E5),
+              color: Color(0xFFE94057),
             ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -126,7 +157,7 @@ class _EcranPrincipalState extends State<EcranPrincipal> {
                 const CircleAvatar(
                   radius: 30,
                   backgroundColor: Colors.white,
-                  child: Icon(Icons.person, size: 40, color: Color(0xFF1E88E5)),
+                  child: Icon(Icons.person, size: 40, color: Color(0xFFE94057)),
                 ),
                 const SizedBox(height: 12),
                 Flexible(
@@ -168,7 +199,7 @@ class _EcranPrincipalState extends State<EcranPrincipal> {
 
   Widget _itemMenu(IconData icone, String titre) {
     return ListTile(
-      leading: Icon(icone, color: const Color(0xFF1E88E5)),
+      leading: Icon(icone, color: const Color(0xFFE94057)),
       title: Text(
         titre,
         style: GoogleFonts.inter(
@@ -178,127 +209,5 @@ class _EcranPrincipalState extends State<EcranPrincipal> {
       ),
       onTap: () => _handleMenuItem(titre),
     ).animate().fadeIn(delay: 400.ms).slideX(begin: -0.2);
-  }
-
-  Widget _selecteurCategories() {
-    return SizedBox(
-      height: 40,
-      child: ListView.builder(
-        scrollDirection: Axis.horizontal,
-        itemCount: _categories.length,
-        itemBuilder: (ctx, index) => Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 8),
-          child: GestureDetector(
-            onTap: () => setState(() => _indexCategorie = index),
-            child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-              decoration: BoxDecoration(
-                color: _indexCategorie == index
-                    ? const Color(0xFF1E88E5)
-                    : const Color(0xFFF5F7FA),
-                borderRadius: BorderRadius.circular(20),
-              ),
-              child: Text(
-                _categories[index],
-                style: GoogleFonts.inter(
-                  color: _indexCategorie == index
-                      ? Colors.white
-                      : const Color(0xFF666666),
-                  fontWeight: FontWeight.w600,
-                  fontSize: 14,
-                ),
-              ),
-            ),
-          ),
-        ).animate().fadeIn(delay: Duration(milliseconds: 200 + index * 100)),
-      ),
-    );
-  }
-
-  Widget _productGrid() {
-    return GridView.builder(
-      padding: const EdgeInsets.all(16),
-      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: 2,
-        crossAxisSpacing: 16,
-        mainAxisSpacing: 16,
-        childAspectRatio: 0.75,
-      ),
-      itemCount: 6, // Placeholder
-      itemBuilder: (context, index) {
-        return GestureDetector(
-          onTap: () => Navigator.pushNamed(context, '/swipe'),
-          child: Container(
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(12),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withOpacity(0.1),
-                  blurRadius: 8,
-                  offset: const Offset(0, 4),
-                ),
-              ],
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                ClipRRect(
-                  borderRadius: const BorderRadius.vertical(top: Radius.circular(12)),
-                  child: Image.network(
-                    'https://via.placeholder.com/150',
-                    height: 120,
-                    width: double.infinity,
-                    fit: BoxFit.cover,
-                    errorBuilder: (context, error, stackTrace) => Container(
-                      height: 120,
-                      color: const Color(0xFFF5F7FA),
-                      child: const Icon(
-                        Icons.image,
-                        size: 60,
-                        color: Color(0xFF666666),
-                      ),
-                    ),
-                  ),
-                ),
-                Padding(
-                  padding: const EdgeInsets.all(12),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'Produit ${index + 1}',
-                        style: GoogleFonts.inter(
-                          fontSize: 16,
-                          fontWeight: FontWeight.w600,
-                          color: const Color(0xFF333333),
-                        ),
-                      ),
-                      const SizedBox(height: 4),
-                      Text(
-                        'Offre exclusive',
-                        style: GoogleFonts.inter(
-                          fontSize: 12,
-                          color: const Color(0xFF666666),
-                        ),
-                      ),
-                      const SizedBox(height: 8),
-                      Text(
-                        '€${(99.99 - index * 10).toStringAsFixed(2)}',
-                        style: GoogleFonts.inter(
-                          fontSize: 16,
-                          fontWeight: FontWeight.w700,
-                          color: const Color(0xFF26A69A),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ).animate().fadeIn(delay: Duration(milliseconds: 200 + index * 100));
-      },
-    );
   }
 }

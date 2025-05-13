@@ -65,19 +65,19 @@ class _EcranInscriptionState extends State<EcranInscription> {
               child: Form(
                 key: _formKey,
                 child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+                  crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
                     Text(
-                      'Inscription',
+                      'BinMax',
                       style: GoogleFonts.inter(
-                        fontSize: 28,
-                        fontWeight: FontWeight.w700,
-                        color: const Color(0xFF333333),
+                        fontSize: 36,
+                        fontWeight: FontWeight.w800,
+                        color: const Color(0xFFE94057),
                       ),
                     ).animate().fadeIn(duration: 800.ms),
                     const SizedBox(height: 8),
                     Text(
-                      'Créez votre compte BinMax',
+                      'Créez votre compte pour swiper',
                       style: GoogleFonts.inter(
                         fontSize: 16,
                         color: const Color(0xFF666666),
@@ -135,11 +135,11 @@ class _EcranInscriptionState extends State<EcranInscription> {
                     const SizedBox(height: 24),
                     _isLoading
                         ? const CircularProgressIndicator(
-                            valueColor: AlwaysStoppedAnimation(Color(0xFF1E88E5)),
+                            valueColor: AlwaysStoppedAnimation(Color(0xFFE94057)),
                           )
                         : ElevatedButton(
                             style: ElevatedButton.styleFrom(
-                              backgroundColor: const Color(0xFF1E88E5),
+                              backgroundColor: const Color(0xFFE94057),
                               foregroundColor: Colors.white,
                               padding: const EdgeInsets.symmetric(
                                 horizontal: 50,
@@ -175,15 +175,15 @@ class _EcranInscriptionState extends State<EcranInscription> {
                             child: Text(
                               'Se connecter',
                               style: GoogleFonts.inter(
-                                color: const Color(0xFF1E88E5),
+                                color: const Color(0xFFE94057),
                                 fontSize: 14,
                                 fontWeight: FontWeight.w600,
                               ),
                             ),
                           ),
                         ],
-                      ).animate().fadeIn(delay: 1400.ms),
-                    ),
+                      ),
+                    ).animate().fadeIn(delay: 1400.ms),
                   ],
                 ),
               ),

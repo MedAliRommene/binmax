@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:binmax_mobile/screens/auth/inscription.dart';
-import 'package:binmax_mobile/widgets/effet_verre.dart';
 
 class EcranConnexion extends StatefulWidget {
   const EcranConnexion({super.key});
@@ -29,9 +28,9 @@ class _EcranConnexionState extends State<EcranConnexion> {
       setState(() => _isLoading = true);
       await Future.delayed(const Duration(seconds: 1)); // Simulate auth
       setState(() => _isLoading = false);
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Connexion réussie')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('Connexion réussie')));
       Navigator.pushReplacementNamed(context, '/accueil');
     }
   }
@@ -68,19 +67,19 @@ class _EcranConnexionState extends State<EcranConnexion> {
               child: Form(
                 key: _formKey,
                 child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+                  crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
                     Text(
-                      'Connexion',
+                      'BinMax',
                       style: GoogleFonts.inter(
-                        fontSize: 28,
-                        fontWeight: FontWeight.w700,
-                        color: const Color(0xFF333333),
+                        fontSize: 36,
+                        fontWeight: FontWeight.w800,
+                        color: const Color(0xFFE94057),
                       ),
                     ).animate().fadeIn(duration: 800.ms),
                     const SizedBox(height: 8),
                     Text(
-                      'Accédez à vos offres exclusives',
+                      'Connectez-vous pour swiper les deals',
                       style: GoogleFonts.inter(
                         fontSize: 16,
                         color: const Color(0xFF666666),
@@ -114,29 +113,29 @@ class _EcranConnexionState extends State<EcranConnexion> {
                     const SizedBox(height: 24),
                     _isLoading
                         ? const CircularProgressIndicator(
-                            valueColor: AlwaysStoppedAnimation(Color(0xFF1E88E5)),
-                          )
+                          valueColor: AlwaysStoppedAnimation(Color(0xFFE94057)),
+                        )
                         : ElevatedButton(
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: const Color(0xFF1E88E5),
-                              foregroundColor: Colors.white,
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 50,
-                                vertical: 16,
-                              ),
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(12),
-                              ),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: const Color(0xFFE94057),
+                            foregroundColor: Colors.white,
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 50,
+                              vertical: 16,
                             ),
-                            onPressed: _handleLogin,
-                            child: Text(
-                              'Se connecter',
-                              style: GoogleFonts.inter(
-                                fontSize: 16,
-                                fontWeight: FontWeight.w600,
-                              ),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
                             ),
-                          ).animate().scale(delay: 800.ms),
+                          ),
+                          onPressed: _handleLogin,
+                          child: Text(
+                            'Se connecter',
+                            style: GoogleFonts.inter(
+                              fontSize: 16,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ).animate().scale(delay: 800.ms),
                     const SizedBox(height: 16),
                     Center(
                       child: Text(
@@ -169,17 +168,18 @@ class _EcranConnexionState extends State<EcranConnexion> {
                     const SizedBox(height: 16),
                     Center(
                       child: TextButton(
-                        onPressed: () => Navigator.pushNamed(context, '/inscription'),
+                        onPressed:
+                            () => Navigator.pushNamed(context, '/inscription'),
                         child: Text(
                           'Créer un compte',
                           style: GoogleFonts.inter(
-                            color: const Color(0xFF1E88E5),
+                            color: const Color(0xFFE94057),
                             fontSize: 14,
                             fontWeight: FontWeight.w600,
                           ),
                         ),
-                      ).animate().fadeIn(delay: 1600.ms),
-                    ),
+                      ),
+                    ).animate().fadeIn(delay: 1600.ms),
                   ],
                 ),
               ),
@@ -226,9 +226,12 @@ class _InputField extends StatelessWidget {
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: const BorderSide(color: Color(0xFF1E88E5), width: 1),
+          borderSide: const BorderSide(color: Color(0xFFE94057), width: 1),
         ),
-        contentPadding: const EdgeInsets.symmetric(vertical: 16, horizontal: 20),
+        contentPadding: const EdgeInsets.symmetric(
+          vertical: 16,
+          horizontal: 20,
+        ),
       ),
     );
   }
@@ -252,9 +255,7 @@ class _SocialButton extends StatelessWidget {
     return IconButton(
       style: IconButton.styleFrom(
         backgroundColor: bgColor,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(12),
-        ),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
         padding: const EdgeInsets.all(12),
       ),
       icon: Icon(icon, size: 28, color: color),

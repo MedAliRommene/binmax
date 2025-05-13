@@ -37,7 +37,7 @@ class ChampAnime extends StatelessWidget {
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: const BorderSide(color: Color(0xFF1E88E5), width: 1),
+          borderSide: const BorderSide(color: Color(0xFFE94057), width: 1),
         ),
         contentPadding: const EdgeInsets.symmetric(vertical: 16, horizontal: 20),
       ),
