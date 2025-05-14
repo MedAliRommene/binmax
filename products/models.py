@@ -34,18 +34,27 @@ class Product(models.Model):
         blank=True,
         verbose_name="Prix"
     )
+    price_at_creation = models.DecimalField(
+        max_digits=10,
+        decimal_places=2,
+        null=True,
+        blank=True,
+        verbose_name="Prix à la création"
+    )
     date_creation = models.DateTimeField(auto_now_add=True)
     quantity = models.PositiveIntegerField(verbose_name="Quantité", default=0)
     vendus = models.PositiveIntegerField(default=0, verbose_name="Vendus")
-    tracker = FieldTracker(fields=['vendus'])
+    tracker = FieldTracker(fields=['vendus', 'quantity'])  # Track both vendus and quantity
+    emplacement_freed = models.BooleanField(default=False, verbose_name="Emplacement libéré", editable=False)
 
     @property
     def prix_effectif(self):
         config = PricingConfiguration.get_config()
         if config.mode == 'daily':
+            from django.utils import timezone
             jour = ['lundi', 'mardi', 'mercredi', 'jeudi', 'vendredi', 'samedi'][self.date_creation.weekday()]
-            return getattr(config, jour) or Decimal('0.00')
-        return self.price or Decimal('0.00')
+            return getattr(config, jour, Decimal('0.00')) or self.price_at_creation or Decimal('0.00')
+        return self.price_at_creation or Decimal('0.00')
 
     @property
     def reste(self):
@@ -57,20 +66,59 @@ class Product(models.Model):
         ordering = ['reference']
 
     def save(self, *args, **kwargs):
-        # Toujours requérir une palette
         if not self.palette_id:
             raise ValueError("Une palette doit être associée au produit")
-        # Gestion des emplacements
+
+        # Store original values for tracking reste changes
+        old_quantity = self.tracker.previous('quantity') if self.pk else 0
+        old_vendus = self.tracker.previous('vendus') if self.pk else 0
+        old_reste = old_quantity - old_vendus if self.pk else 0
+
+        # Calculate new reste
+        new_reste = self.quantity - self.vendus
+
+        # Handle quantity changes for emplacement_used
+        old_quantity_for_emplacement = getattr(self, 'original_quantity', 0) if hasattr(self, 'original_quantity') else 0
+        quantity_change = self.quantity - old_quantity_for_emplacement if old_quantity_for_emplacement else self.quantity
+
         if self.pk is None:
-            if self.rayon.emplacement_available <= 0:
-                raise ValueError("Aucun emplacement disponible")
-            self.rayon.emplacement_used += 1
+            # Creation: Check availability and increment by quantity
+            if self.rayon.emplacement_available < self.quantity:
+                raise ValueError(f"Pas assez d'emplacements disponibles : {self.rayon.emplacement_available} disponibles, {self.quantity} nécessaires")
+            self.rayon.emplacement_used += self.quantity
             self.rayon.save(update_fields=['emplacement_used'])
+            if self.price and not self.price_at_creation:
+                self.price_at_creation = self.price
+        else:
+            # Update: Adjust emplacement_used based on quantity change
+            if self.tracker.has_changed('quantity') and not self.emplacement_freed:
+                current_available = self.rayon.emplacement_available + old_quantity_for_emplacement
+                if current_available < quantity_change:
+                    raise ValueError(f"Pas assez d'emplacements disponibles : {current_available} disponibles, {quantity_change} nécessaires")
+                self.rayon.emplacement_used += quantity_change
+                self.rayon.save(update_fields=['emplacement_used'])
+
         super().save(*args, **kwargs)
-        # Libérer l’emplacement quand tout est vendu
-        if self.reste == 0 and self.tracker.has_changed('vendus'):
-            self.rayon.emplacement_used -= 1
-            self.rayon.save(update_fields=['emplacement_used'])
+
+        # Handle reste changes
+        if (self.tracker.has_changed('quantity') or self.tracker.has_changed('vendus')) and not self.emplacement_freed:
+            if new_reste == 0 and old_reste != 0:  # Reste just reached 0
+                self.rayon.emplacement_used = max(0, self.rayon.emplacement_used - self.quantity)
+                self.rayon.save(update_fields=['emplacement_used'])
+                self.emplacement_freed = True
+                super().save(update_fields=['emplacement_freed'])
+            elif new_reste > 0 and old_reste == 0:  # Reste increased from 0 to >0
+                # Reclaim emplacements if reste goes back above 0
+                if self.rayon.emplacement_available < self.quantity:
+                    raise ValueError(f"Pas assez d'emplacements disponibles : {self.rayon.emplacement_available} disponibles, {self.quantity} nécessaires")
+                self.rayon.emplacement_used += self.quantity
+                self.rayon.save(update_fields=['emplacement_used'])
+                self.emplacement_freed = False
+                super().save(update_fields=['emplacement_freed'])
+
+        # Store the original quantity for the next save
+        if self.pk:
+            self.original_quantity = old_quantity_for_emplacement or self.quantity
 
     def __str__(self):
         return f"{self.reference} - {self.name}"
@@ -104,7 +152,7 @@ class PricingConfiguration(models.Model):
 
     class Meta:
         verbose_name = "Configuration des Prix"
-        verbose_name_plural = "Configuration des Prix"
+        verbose_name_plural = "Configurations des Prix"
 
     def save(self, *args, **kwargs):
         self.id = 1  # Singleton

@@ -13,6 +13,9 @@ class Entrepot(models.Model):
     def __str__(self):
         return f"ENT-{self.code}"
 
+    def total_emplacements_disponibles(self):
+        return sum(rayon.emplacement_available for rayon in Rayon.objects.filter(zone__entrepot=self))
+
 class Zone(models.Model):
     entrepot = models.ForeignKey(Entrepot, on_delete=models.PROTECT, related_name='zones', verbose_name="Entrepôt")
     code = models.CharField(max_length=10, verbose_name="Code")
