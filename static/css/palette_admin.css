@@ -53,3 +53,30 @@
         min-width: 100%;
     }
 }
+
+/* Style pour le lien des produits */
+a.produits-link {
+    background: #417690;
+    color: white !important;
+    padding: 8px 12px;
+    border-radius: 4px;
+    text-decoration: none;
+    display: inline-block;
+    margin: 5px 0;
+}
+
+a.produits-link:hover {
+    background: #205067;
+}
+
+/* Style pour les statistiques */
+.readonly {
+    font-weight: bold;
+    color: #2c3e50;
+}
+
+/* Amélioration de l'espacement */
+.field-nombre_produits input {
+    font-weight: bold;
+    color: #27ae60;
+}

@@ -57,12 +57,17 @@ class Product(models.Model):
         ordering = ['reference']
 
     def save(self, *args, **kwargs):
-        if self.pk is None:  # New product
+        # Toujours requérir une palette
+        if not self.palette_id:
+            raise ValueError("Une palette doit être associée au produit")
+        # Gestion des emplacements
+        if self.pk is None:
             if self.rayon.emplacement_available <= 0:
-                raise ValueError("Aucun emplacement disponible dans ce rayon.")
+                raise ValueError("Aucun emplacement disponible")
             self.rayon.emplacement_used += 1
             self.rayon.save(update_fields=['emplacement_used'])
         super().save(*args, **kwargs)
+        # Libérer l’emplacement quand tout est vendu
         if self.reste == 0 and self.tracker.has_changed('vendus'):
             self.rayon.emplacement_used -= 1
             self.rayon.save(update_fields=['emplacement_used'])

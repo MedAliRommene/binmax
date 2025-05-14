@@ -70,11 +70,7 @@ JAZZMIN_SETTINGS = {
         "products.Product": "fas fa-box-open",
     
     }, "custom_links": {
-        "products": [{
-            "name": "Configuration Prix",
-            "url": "/admin/products/pricingconfiguration/",
-            "icon": "fas fa-euro-sign",
-        }]
+        
     },
     "show_ui_builder": True,
     "changeform_format": "horizontal_tabs",
