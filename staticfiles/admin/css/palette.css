@@ -1,0 +1,29 @@
+/* Style des produits en liste */
+.inline-related .module {
+    border: 1px solid #ddd;
+    margin-bottom: 15px;
+    border-radius: 4px;
+    padding: 15px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+
+/* Style du bouton d'ajout */
+a.button[href*="add-product"] {
+    margin: 20px 0;
+    display: inline-block;
+    transition: transform 0.2s;
+}
+
+a.button[href*="add-product"]:hover {
+    transform: scale(1.05);
+    text-decoration: none;
+}
+
+/* Affichage en grille responsive */
+@media (min-width: 768px) {
+    .inline-related .module {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+        gap: 20px;
+    }
+}

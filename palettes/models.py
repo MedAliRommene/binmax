@@ -1,6 +1,7 @@
 from django.db import models
 from django.db.models import Sum
 from decimal import Decimal
+from entrepot.models import Entrepot
 
 class Fournisseur(models.Model):
     nom = models.CharField(max_length=100, verbose_name="Nom du Fournisseur")
@@ -16,6 +17,7 @@ class Fournisseur(models.Model):
 
 class Palette(models.Model):
     reference = models.CharField(max_length=20, unique=True, editable=False, verbose_name="Référence")
+    entrepot = models.ForeignKey(Entrepot, on_delete=models.PROTECT, related_name='palettes', verbose_name="Entrepôt")
     date_ajout = models.DateField(verbose_name="Date d'ajout")
     prix_achat = models.DecimalField(max_digits=10, decimal_places=2, verbose_name="Prix d'achat")
     commentaire = models.TextField(blank=True, verbose_name="Commentaire")
@@ -33,7 +35,7 @@ class Palette(models.Model):
 
     @property
     def total_sold(self):
-        return sum(product.price * Decimal(product.vendus) for product in self.products.all()) or Decimal('0.00')
+        return sum(product.prix_effectif * Decimal(product.vendus) for product in self.products.all()) or Decimal('0.00')
 
     @property
     def benefice(self):

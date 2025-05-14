@@ -9,9 +9,9 @@ def generate_product_reference(sender, instance, created, **kwargs):
         instance.reference = (
             f"PAL-{palette_ref}-"
             f"{instance.category.code}-"
-            f"{instance.emplacement.rayon.zone.code}-"
-            f"{instance.emplacement.rayon.code}-"
-            f"{instance.emplacement.code}-"
+            f"{instance.rayon.zone.entrepot.code}-"
+            f"{instance.rayon.zone.code}-"
+            f"{instance.rayon.code}-"
             f"{Product.objects.filter(palette=instance.palette).count():04d}"
         )
         instance.save()

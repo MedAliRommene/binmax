@@ -1,5 +1,14 @@
 from rest_framework import serializers
-from .models import Product, Category, Zone, Rayon, Emplacement, ProductImage
+from .models import Category, Product, ProductImage, PricingConfiguration
+from palettes.models import Palette
+from entrepot.serializers import EntrepotSerializer
+
+class CategorySerializer(serializers.ModelSerializer):
+    entrepot = serializers.StringRelatedField()
+
+    class Meta:
+        model = Category
+        fields = ['id', 'entrepot', 'code', 'name']
 
 class ProductImageSerializer(serializers.ModelSerializer):
     class Meta:
@@ -10,35 +19,12 @@ class ProductSerializer(serializers.ModelSerializer):
     images = ProductImageSerializer(many=True, read_only=True)
     palette = serializers.StringRelatedField()
     category = serializers.StringRelatedField()
-    emplacement = serializers.StringRelatedField()
+    zone = serializers.StringRelatedField()
+    rayon = serializers.StringRelatedField()
 
     class Meta:
         model = Product
         fields = [
-            'id', 'reference', 'palette', 'category', 'emplacement',
+            'id', 'reference', 'palette', 'category', 'zone', 'rayon',
             'name', 'description', 'price', 'quantity', 'vendus', 'reste'
         ]
-
-class CategorySerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Category
-        fields = ['id', 'code', 'name']
-
-class ZoneSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Zone
-        fields = ['id', 'code', 'name']
-
-class RayonSerializer(serializers.ModelSerializer):
-    zone = serializers.StringRelatedField()
-
-    class Meta:
-        model = Rayon
-        fields = ['id', 'zone', 'code', 'name', 'emplacement_count']
-
-class EmplacementSerializer(serializers.ModelSerializer):
-    rayon = serializers.StringRelatedField()
-
-    class Meta:
-        model = Emplacement
-        fields = ['id', 'rayon', 'code', 'name']

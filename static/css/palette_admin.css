@@ -1,0 +1,55 @@
+/* Custom styling for Jazzmin compatibility */
+.inline-group {
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    margin-bottom: 20px;
+    padding: 10px;
+    background: #f9f9f9;
+}
+
+.inline-related {
+    margin: 5px 0;
+    border-bottom: 1px solid #eee;
+}
+
+.inline-related .form-row {
+    padding: 8px 10px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.inline-related .form-row > div {
+    flex: 1;
+    min-width: 200px;
+}
+
+.inline-related .form-row .field-box {
+    margin-bottom: 10px;
+}
+
+.inline-related .form-row .field-box label {
+    font-weight: bold;
+    display: block;
+    margin-bottom: 5px;
+}
+
+.inline-related .form-row .field-box input,
+.inline-related .form-row .field-box select {
+    width: 100%;
+    padding: 6px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+}
+
+.inline-related .form-row .readonly {
+    background: #f0f0f0;
+    padding: 6px;
+    border-radius: 4px;
+}
+
+@media (max-width: 768px) {
+    .inline-related .form-row > div {
+        min-width: 100%;
+    }
+}

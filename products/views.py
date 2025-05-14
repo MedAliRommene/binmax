@@ -1,23 +1,18 @@
 from rest_framework import viewsets
-from .models import Product, Category, Zone, Rayon, Emplacement
-from .serializers import ProductSerializer, CategorySerializer, ZoneSerializer, RayonSerializer, EmplacementSerializer
-
-class ProductViewSet(viewsets.ModelViewSet):
-    queryset = Product.objects.all()
-    serializer_class = ProductSerializer
+from django.http import JsonResponse
+from django.contrib.admin.views.decorators import staff_member_required
+from .models import Category, Product, PricingConfiguration
+from .serializers import CategorySerializer, ProductSerializer
 
 class CategoryViewSet(viewsets.ModelViewSet):
     queryset = Category.objects.all()
     serializer_class = CategorySerializer
 
-class ZoneViewSet(viewsets.ModelViewSet):
-    queryset = Zone.objects.all()
-    serializer_class = ZoneSerializer
+class ProductViewSet(viewsets.ModelViewSet):
+    queryset = Product.objects.all()
+    serializer_class = ProductSerializer
 
-class RayonViewSet(viewsets.ModelViewSet):
-    queryset = Rayon.objects.all()
-    serializer_class = RayonSerializer
-
-class EmplacementViewSet(viewsets.ModelViewSet):
-    queryset = Emplacement.objects.all()
-    serializer_class = EmplacementSerializer
+@staff_member_required
+def pricing_config(request):
+    config = PricingConfiguration.get_config()
+    return JsonResponse({'mode': config.mode})

@@ -1,0 +1,11 @@
+/* Basic styling for admin interface */
+.nested-container {
+    margin-bottom: 20px;
+}
+.nested-tabular tr {
+    background-color: #f9f9f9;
+}
+.nested-tabular th, .nested-tabular td {
+    padding: 8px;
+    border: 1px solid #ddd;
+}

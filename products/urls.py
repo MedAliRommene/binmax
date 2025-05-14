@@ -1,14 +1,12 @@
 from django.urls import path, include
 from rest_framework.routers import DefaultRouter
-from .views import ProductViewSet, CategoryViewSet, ZoneViewSet, RayonViewSet, EmplacementViewSet
+from .views import CategoryViewSet, ProductViewSet, pricing_config
 
 router = DefaultRouter()
-router.register(r'products', ProductViewSet)
 router.register(r'categories', CategoryViewSet)
-router.register(r'zones', ZoneViewSet)
-router.register(r'rayons', RayonViewSet)
-router.register(r'emplacements', EmplacementViewSet)
+router.register(r'products', ProductViewSet)
 
 urlpatterns = [
     path('', include(router.urls)),
+    path('pricing-config/', pricing_config, name='pricing_config'),
 ]

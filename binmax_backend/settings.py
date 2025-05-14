@@ -48,9 +48,37 @@ INSTALLED_APPS = [
     "dashbords",
     "products",
     "palettes",
+    "entrepot",
     "users",
     "orders",
 ]
+
+JAZZMIN_SETTINGS = {
+    "site_title": "Gestion Stock Binmax",
+    "site_header": "Binmax",
+    "site_brand": "Gestion Stock Binmax",
+    "welcome_sign": "Bienvenue dans l'administration Binmax",
+    "icons": {
+        "palettes.Palette": "fas fa-pallet",
+        "palettes.Fournisseur": "fas fa-truck",
+        "products.Product": "fas fa-box-open",
+        "products.Category": "fas fa-tags",
+        "products.Zone": "fas fa-map-marker-alt",
+        "products.Rayon": "fas fa-archive",
+        "products.Emplacement": "fas fa-location-arrow",
+        "products.PricingConfiguration": "fas fa-cog",
+        "products.Product": "fas fa-box-open",
+    
+    }, "custom_links": {
+        "products": [{
+            "name": "Configuration Prix",
+            "url": "/admin/products/pricingconfiguration/",
+            "icon": "fas fa-euro-sign",
+        }]
+    },
+    "show_ui_builder": True,
+    "changeform_format": "horizontal_tabs",
+}
 
 MIDDLEWARE = [
     "corsheaders.middleware.CorsMiddleware",

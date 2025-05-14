@@ -1,70 +1,47 @@
 from django.contrib import admin
-from django.utils.html import format_html
-from .models import Product, Category, Zone, Rayon, Emplacement, ProductImage
+from django import forms
+from .models import Category, PricingConfiguration
 
-class ProductImageInline(admin.TabularInline):
-    model = ProductImage
-    extra = 1
-    fields = ('image', 'is_main', 'image_preview')
-    readonly_fields = ('image_preview',)
+class PricingConfigurationForm(forms.ModelForm):
+    class Meta:
+        model = PricingConfiguration
+        fields = '__all__'
+        widgets = {
+            'mode': forms.Select(attrs={'onchange': "this.form.submit();"}),
+        }
 
-    def image_preview(self, obj):
-        if obj.image:
-            return format_html('<img src="{}" style="max-height: 100px;" />', obj.image.url)
-        return "-"
-    image_preview.short_description = "Aperçu"
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        if self.instance.mode == 'daily':
+            for field in ['lundi', 'mardi', 'mercredi', 'jeudi', 'vendredi', 'samedi']:
+                self.fields[field].required = True
+        else:
+            for field in ['lundi', 'mardi', 'mercredi', 'jeudi', 'vendredi', 'samedi']:
+                self.fields[field].required = False
 
-class ProductInline(admin.TabularInline):
-    model = Product
-    extra = 1
-    fields = ('name', 'category', 'emplacement', 'price', 'quantity', 'vendus', 'description')
-    autocomplete_fields = ['category', 'emplacement']
-    readonly_fields = ('reference',)
-
-@admin.register(Product)
-class ProductAdmin(admin.ModelAdmin):
-    inlines = [ProductImageInline]
-    list_display = ('reference', 'name', 'palette', 'category', 'emplacement', 'price', 'quantity', 'vendus', 'reste')
-    search_fields = ('reference', 'name')
-    list_filter = ('palette', 'category', 'emplacement__rayon__zone')
-    readonly_fields = ('reference',)
-    fieldsets = (
-        ('Informations Générales', {
-            'fields': ('reference', 'name', 'description', 'palette')
-        }),
-        ('Stockage', {
-            'fields': ('category', 'emplacement')
-        }),
-        ('Inventaire', {
-            'fields': ('price', 'quantity', 'vendus')
-        }),
-    )
-    autocomplete_fields = ['palette', 'category', 'emplacement']
-
-    def reste(self, obj):
-        return obj.reste
-    reste.short_description = "Reste à vendre"
+    def clean(self):
+        cleaned_data = super().clean()
+        mode = cleaned_data.get('mode')
+        if mode == 'daily':
+            for field in ['lundi', 'mardi', 'mercredi', 'jeudi', 'vendredi', 'samedi']:
+                if not cleaned_data.get(field):
+                    self.add_error(field, "Ce champ est obligatoire en mode journalier.")
+        return cleaned_data
 
 @admin.register(Category)
 class CategoryAdmin(admin.ModelAdmin):
-    list_display = ('code', 'name')
-    search_fields = ('code', 'name')
+    list_display = ('code', 'name', 'entrepot')
+    search_fields = ('code', 'name', 'entrepot__code')
+    list_filter = ('entrepot',)
+    autocomplete_fields = ['entrepot']
 
-@admin.register(Zone)
-class ZoneAdmin(admin.ModelAdmin):
-    list_display = ('code', 'name')
-    search_fields = ('code', 'name')
+@admin.register(PricingConfiguration)
+class PricingConfigurationAdmin(admin.ModelAdmin):
+    form = PricingConfigurationForm
+    list_display = ('mode', 'lundi', 'mardi', 'mercredi', 'jeudi', 'vendredi', 'samedi')
+    
+    def has_add_permission(self, request):
+        return not PricingConfiguration.objects.exists()
 
-@admin.register(Rayon)
-class RayonAdmin(admin.ModelAdmin):
-    list_display = ('code', 'name', 'zone', 'emplacement_count')
-    list_filter = ('zone',)
-    search_fields = ('code', 'name', 'zone__code')
-    autocomplete_fields = ['zone']
-
-@admin.register(Emplacement)
-class EmplacementAdmin(admin.ModelAdmin):
-    list_display = ('code', 'name', 'rayon')
-    list_filter = ('rayon__zone',)
-    search_fields = ('code', 'name', 'rayon__code')
-    autocomplete_fields = ['rayon']
+    class Media:
+        js = ('js/pricing_mode.js',)

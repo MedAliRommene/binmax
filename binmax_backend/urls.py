@@ -13,6 +13,7 @@ urlpatterns = [
     path("", include('admin_soft.urls')),
     path('api/products/', include('products.urls')),
     path('api/palettes/', include('palettes.urls')),
+    path('api/entrepot/', include('entrepot.urls')),
     path('api/users/', include('users.urls')),
     path('api/orders/', include('orders.urls')),
     path('api/token/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
