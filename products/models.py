@@ -49,12 +49,13 @@ class Product(models.Model):
 
     @property
     def prix_effectif(self):
+        # Use daily price if mode is 'daily', otherwise use price_at_creation or price
         config = PricingConfiguration.get_config()
-        if config.mode == 'daily':
+        if config and config.mode == 'daily':
             from django.utils import timezone
             jour = ['lundi', 'mardi', 'mercredi', 'jeudi', 'vendredi', 'samedi'][self.date_creation.weekday()]
             return getattr(config, jour, Decimal('0.00')) or self.price_at_creation or Decimal('0.00')
-        return self.price_at_creation or Decimal('0.00')
+        return self.price_at_creation or self.price or Decimal('0.00')
 
     @property
     def reste(self):
@@ -156,5 +157,8 @@ class PricingConfiguration(models.Model):
 
     @classmethod
     def get_config(cls):
-        return cls.objects.get_or_create(id=1)[0]
-    
+        # Safely retrieve the PricingConfiguration instance without creating one
+        try:
+            return cls.objects.get(id=1)
+        except cls.DoesNotExist:
+            return None
