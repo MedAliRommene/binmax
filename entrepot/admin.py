@@ -42,5 +42,4 @@ class RayonAdmin(admin.ModelAdmin):
     emplacement_available_display.short_description = "Emplacements disponibles"
 
     def get_queryset(self, request):
-        # Force refresh of the queryset to ensure latest emplacement_used values
         return super().get_queryset(request).select_related('zone__entrepot')

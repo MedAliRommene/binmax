@@ -44,7 +44,7 @@ class Product(models.Model):
     date_creation = models.DateTimeField(auto_now_add=True)
     quantity = models.PositiveIntegerField(verbose_name="Quantité", default=0)
     vendus = models.PositiveIntegerField(default=0, verbose_name="Vendus")
-    tracker = FieldTracker(fields=['vendus', 'quantity'])  # Track both vendus and quantity
+    tracker = FieldTracker(fields=['vendus', 'quantity'])
     emplacement_freed = models.BooleanField(default=False, verbose_name="Emplacement libéré", editable=False)
 
     @property
@@ -69,56 +69,52 @@ class Product(models.Model):
         if not self.palette_id:
             raise ValueError("Une palette doit être associée au produit")
 
-        # Store original values for tracking reste changes
-        old_quantity = self.tracker.previous('quantity') if self.pk else 0
-        old_vendus = self.tracker.previous('vendus') if self.pk else 0
-        old_reste = old_quantity - old_vendus if self.pk else 0
+        # Fetch the previous state from the database if the product exists
+        old_reste = 0
+        if self.pk:
+            try:
+                old_product = Product.objects.get(pk=self.pk)
+                old_reste = old_product.quantity - old_product.vendus
+                print(f"Previous state: quantity={old_product.quantity}, vendus={old_product.vendus}, old_reste={old_reste}")
+            except Product.DoesNotExist:
+                old_reste = 0
 
         # Calculate new reste
         new_reste = self.quantity - self.vendus
+        print(f"New state: quantity={self.quantity}, vendus={self.vendus}, new_reste={new_reste}")
 
-        # Handle quantity changes for emplacement_used
-        old_quantity_for_emplacement = getattr(self, 'original_quantity', 0) if hasattr(self, 'original_quantity') else 0
-        quantity_change = self.quantity - old_quantity_for_emplacement if old_quantity_for_emplacement else self.quantity
-
+        # Handle creation
         if self.pk is None:
-            # Creation: Check availability and increment by quantity
             if self.rayon.emplacement_available < self.quantity:
                 raise ValueError(f"Pas assez d'emplacements disponibles : {self.rayon.emplacement_available} disponibles, {self.quantity} nécessaires")
             self.rayon.emplacement_used += self.quantity
+            print(f"Creating product: Adding {self.quantity} to emplacement_used, now {self.rayon.emplacement_used}")
             self.rayon.save(update_fields=['emplacement_used'])
             if self.price and not self.price_at_creation:
                 self.price_at_creation = self.price
-        else:
-            # Update: Adjust emplacement_used based on quantity change
-            if self.tracker.has_changed('quantity') and not self.emplacement_freed:
-                current_available = self.rayon.emplacement_available + old_quantity_for_emplacement
-                if current_available < quantity_change:
-                    raise ValueError(f"Pas assez d'emplacements disponibles : {current_available} disponibles, {quantity_change} nécessaires")
-                self.rayon.emplacement_used += quantity_change
-                self.rayon.save(update_fields=['emplacement_used'])
 
+        # Save the product
         super().save(*args, **kwargs)
 
-        # Handle reste changes
-        if (self.tracker.has_changed('quantity') or self.tracker.has_changed('vendus')) and not self.emplacement_freed:
-            if new_reste == 0 and old_reste != 0:  # Reste just reached 0
-                self.rayon.emplacement_used = max(0, self.rayon.emplacement_used - self.quantity)
+        # Handle reste changes after saving
+        if self.pk:  # Only for updates
+            reste_change = new_reste - old_reste
+            print(f"Reste change: {reste_change} (from {old_reste} to {new_reste})")
+            if reste_change != 0:  # Reste has changed
+                if new_reste == 0:  # Reste reached 0
+                    self.rayon.emplacement_used = max(0, self.rayon.emplacement_used - old_reste)
+                    self.emplacement_freed = True
+                    print(f"Reste reached 0: Reducing emplacement_used by {old_reste}, now {self.rayon.emplacement_used}")
+                else:  # General case: reste changed
+                    effective_available = self.rayon.emplacement_available - reste_change
+                    if effective_available < 0:
+                        raise ValueError(f"Pas assez d'emplacements disponibles : {effective_available + reste_change} disponibles, {new_reste} nécessaires")
+                    self.rayon.emplacement_used += reste_change
+                    print(f"Reste changed: Adjusting emplacement_used by {reste_change}, now {self.rayon.emplacement_used}")
+                    if self.emplacement_freed and new_reste > 0:  # Reset flag if reste becomes non-zero
+                        self.emplacement_freed = False
+                        super().save(update_fields=['emplacement_freed'])
                 self.rayon.save(update_fields=['emplacement_used'])
-                self.emplacement_freed = True
-                super().save(update_fields=['emplacement_freed'])
-            elif new_reste > 0 and old_reste == 0:  # Reste increased from 0 to >0
-                # Reclaim emplacements if reste goes back above 0
-                if self.rayon.emplacement_available < self.quantity:
-                    raise ValueError(f"Pas assez d'emplacements disponibles : {self.rayon.emplacement_available} disponibles, {self.quantity} nécessaires")
-                self.rayon.emplacement_used += self.quantity
-                self.rayon.save(update_fields=['emplacement_used'])
-                self.emplacement_freed = False
-                super().save(update_fields=['emplacement_freed'])
-
-        # Store the original quantity for the next save
-        if self.pk:
-            self.original_quantity = old_quantity_for_emplacement or self.quantity
 
     def __str__(self):
         return f"{self.reference} - {self.name}"
@@ -161,3 +157,4 @@ class PricingConfiguration(models.Model):
     @classmethod
     def get_config(cls):
         return cls.objects.get_or_create(id=1)[0]
+    

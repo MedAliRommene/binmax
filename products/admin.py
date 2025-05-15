@@ -8,7 +8,6 @@ from entrepot.models import Zone, Rayon
 from .models import Product, ProductImage, Category, PricingConfiguration
 from django.db.models import F
 
-# ----- Inline pour les images -----
 class ProductImageInline(admin.TabularInline):
     model = ProductImage
     extra = 1
@@ -104,5 +103,6 @@ class PricingConfigurationAdmin(admin.ModelAdmin):
             pc = PricingConfiguration.objects.first()
             return redirect(reverse('admin:products_pricingconfiguration_change', args=[pc.pk]))
         return super().add_view(request, form_url, extra_context)
+
     class Media:
         js = ('js/pricing_mode.js',)

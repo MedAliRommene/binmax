@@ -11,19 +11,18 @@ def generate_product_reference(sender, instance, created, **kwargs):
             f"{instance.rayon.zone.entrepot.code}-"
             f"PAL-{palette_ref}-"
             f"{instance.category.code}-"
-            
             f"{instance.rayon.zone.code}-"
             f"{instance.rayon.code}-"
             f"{Product.objects.filter(palette=instance.palette).count():04d}"
         )
-        instance.save()
-        
+        # Update the reference without calling save() to avoid recursion
+        Product.objects.filter(pk=instance.pk).update(reference=instance.reference)
+
 # Add tracker to PricingConfiguration
 PricingConfiguration._tracker = FieldTracker(fields=['mode'])
 
 @receiver(pre_save, sender=PricingConfiguration)
 def pricing_mode_pre_save(sender, instance, **kwargs):
-    # Capture old mode
     if instance.pk:
         old = sender.objects.get(pk=instance.pk)
         instance._old_mode = old.mode
@@ -36,7 +35,6 @@ def update_product_prices_on_mode_change(sender, instance, created, **kwargs):
     new_mode = instance.mode
     if not created and old_mode != new_mode:
         if new_mode == 'daily':
-            # Set all products' price to daily rate
             products = Product.objects.all()
             for p in products:
                 day_field = ['lundi','mardi','mercredi','jeudi','vendredi','samedi'][p.date_creation.weekday()]
@@ -44,5 +42,4 @@ def update_product_prices_on_mode_change(sender, instance, created, **kwargs):
                 p.price = daily_price
                 p.save(update_fields=['price'])
         else:
-            # In product mode, you might reset or leave as-is
             pass
